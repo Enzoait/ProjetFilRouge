@@ -23,7 +23,7 @@ jobs:
           aws-region: eu-west-1 # The AWS region for operations
 
       - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v4
+        uses: hashicorp/setup-terraform@v3
 
       - name: deploy terraform # Step to deploy using a custom script
         run: |
