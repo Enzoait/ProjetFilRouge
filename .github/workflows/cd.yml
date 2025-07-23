@@ -21,6 +21,10 @@ jobs:
           audience: sts.amazonaws.com # The audience for the AWS credentials
           role-to-assume: ${{secrets.AWS_IAM_ROLE}} # The AWS role ARN to assume from secrets
           aws-region: eu-west-1 # The AWS region for operations
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v4
+
       - name: deploy terraform # Step to deploy using a custom script
         run: |
           terraform fmt
