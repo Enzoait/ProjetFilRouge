@@ -29,6 +29,21 @@ jobs:
         run: |
           terraform fmt
           terraform init
+          |
+          # Import ECR frontend if not already in state
+          if ! terraform state list | grep -q 'aws_ecr_repository.frontend'; then
+            terraform import aws_ecr_repository.frontend projetfilrouge-frontend
+          fi
+
+          # Import ECR backend if not already in state
+          if ! terraform state list | grep -q 'aws_ecr_repository.backend'; then
+            terraform import aws_ecr_repository.backend projetfilrouge-backend
+          fi
+
+          # Import S3 bucket if not already in state
+          if ! terraform state list | grep -q 'aws_s3_bucket.example'; then
+            terraform import aws_s3_bucket.example iimtib62673
+          fi
           terraform apply --auto-approve=true
       - name: destroy terraform # Step to deploy using a custom script
         run: |
