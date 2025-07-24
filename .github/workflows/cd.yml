@@ -72,7 +72,7 @@ jobs:
       
       - name: Import existing OAC
         run: |
-          terraform import aws_cloudfront_origin_access_control.s3_oac ${{ secrets.AWS_OAC_ID }}
+          terraform import aws_cloudfront_origin_access_control.s3_oac ${{ secrets.A }}
 
       - name: Terraform Apply
         run: |
