@@ -70,6 +70,11 @@ jobs:
             terraform import aws_s3_bucket.main iimtib62673
           fi
 
+          # Import Cloudfront OAC if not already in state
+          if ! terraform state list | grep -q 'aws_cloudfront_origin_access_control.s3_oac'; then
+            terraform import aws_cloudfront_origin_access_control.s3_oac $(aws cloudfront list-origin-access-controls --query 'OriginAccessControls[]|{Id,Name}' --output text | awk '{print $2}')
+          fi
+
       - name: Terraform Apply
         run: |
           terraform fmt
