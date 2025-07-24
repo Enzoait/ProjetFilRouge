@@ -24,10 +24,10 @@ jobs:
           aws-region: eu-west-1
 
       - name: Build Frontend Docker image
-        run: docker build -t enzoait/projetfilrouge-frontend:${{ github.sha }} ./frontend
+        run: docker build -t enzoait/projetfilrouge-frontend:${{ github.sha }} ../../frontend
 
       - name: Build Backend Docker image
-        run: docker build -t enzoait/projetfilrouge-backend:${{ github.sha }} ./backend
+        run: docker build -t enzoait/projetfilrouge-backend:${{ github.sha }} ../../backend
 
       - name: Tag & Push Frontend
         run: |
