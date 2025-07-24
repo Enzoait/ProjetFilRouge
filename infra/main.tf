@@ -91,7 +91,7 @@ resource "null_resource" "sync_website_files" {
 }
 
 resource "aws_cloudfront_origin_access_control" "s3_oac" {
-  name                              = "s3-oac"
+  name                              = "s3-oac-${aws_s3_bucket.main.id}"
   description                       = "OAC for S3 static website"
   origin_access_control_origin_type  = "s3"
   signing_behavior                  = "never"
