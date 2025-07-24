@@ -66,8 +66,8 @@ jobs:
           fi
 
           # Import S3 bucket if not already in state
-          if ! terraform state list | grep -q 'aws_s3_bucket.example'; then
-            terraform import aws_s3_bucket.example iimtib62673
+          if ! terraform state list | grep -q 'aws_s3_bucket.main'; then
+            terraform import aws_s3_bucket.main iimtib62673
           fi
 
       - name: Terraform Apply
