@@ -72,8 +72,7 @@ jobs:
       
       - name: Import existing OAC
         run: |
-          OAC_ID=$(aws cloudfront get-origin-access-control --id $(aws cloudfront list-origin-access-controls --query 'OriginAccessControls[1].Id' --output text) --query 'ETag' --output text)
-          terraform import aws_cloudfront_origin_access_control.s3_oac ${OAC_ID}
+          terraform import aws_cloudfront_origin_access_control.s3_oac ${{ secrets.AWS_OAC_ID }}
 
       - name: Terraform Apply
         run: |
