@@ -31,8 +31,6 @@ jobs:
 
       - name: Login to ECR
         run: aws ecr get-login-password --region eu-west-1 | docker login --username AWS --password-stdin 304230205768.dkr.ecr.eu-west-1.amazonaws.com
-      - name: Push image to ECR
-        run: docker push 304230205768.dkr.ecr.eu-west-1.amazonaws.com/projetfilrouge-frontend:${{ github.sha }}
 
       - name: Tag & Push Frontend
         run: |
