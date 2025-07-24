@@ -24,23 +24,24 @@ jobs:
           aws-region: eu-west-1
 
       - name: Build Frontend Docker image
-        run: docker build -t ${{ github.repository }}-frontend:${{ github.sha }} ./frontend
+        run: docker build -t enzoait/projetfilrouge-frontend:${{ github.sha }} ./frontend
 
       - name: Build Backend Docker image
-        run: docker build -t ${{ github.repository }}-backend:${{ github.sha }} ./backend
-
-      - name: Login to Amazon ECR
-        run: |
-          aws ecr get-login-password --region eu-west-1 | docker login --username AWS --password-stdin 304230205768.dkr.ecr.eu-west-1.amazonaws.com
+        run: docker build -t enzoait/projetfilrouge-backend:${{ github.sha }} ./backend
 
       - name: Tag & Push Frontend
         run: |
-          docker tag ${{ github.repository }}-frontend:${{ github.sha }} 304230205768.dkr.ecr.eu-west-1.amazonaws.com/projetfilrouge-frontend:${{ github.sha }}
+          docker tag enzoait/projetfilrouge-frontend:${{ github.sha }} 304230205768.dkr.ecr.eu-west-1.amazonaws.com/projetfilrouge-frontend:${{ github.sha }}
           docker push 304230205768.dkr.ecr.eu-west-1.amazonaws.com/projetfilrouge-frontend:${{ github.sha }}
 
       - name: Tag & Push Backend
         run: |
-          docker tag ${{ github.repository }}-backend:${{ github.sha }} 304230205768.dkr.ecr.eu-west-1.amazonaws.com/projetfilrouge-backend:${{ github.sha }}
+          docker tag enzoait/projetfilrouge-backend:${{ github.sha }} 304230205768.dkr.ecr.eu-west-1.amazonaws.com/projetfilrouge-backend:${{ github.sha }}
+          docker push 304230205768.dkr.ecr.eu-west-1.amazonaws.com/projetfilrouge-backend:${{ github.sha }}
+
+      - name: Tag & Push Backend
+        run: |
+          docker tag enzoait/projetfilrouge-backend:${{ github.sha }} 304230205768.dkr.ecr.eu-west-1.amazonaws.com/projetfilrouge-backend:${{ github.sha }}
           docker push 304230205768.dkr.ecr.eu-west-1.amazonaws.com/projetfilrouge-backend:${{ github.sha }}
 
       - name: Setup Terraform
