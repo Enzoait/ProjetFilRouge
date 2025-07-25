@@ -19,26 +19,43 @@ def lambda_handler(event, context):
     elif operation == 'delete':
         response = delete_item(payload)
     else:
-        response = {'statusCode': 400, 'body': json.dumps({'message': 'Opération inconnue'})}
+        return format_response(400, {'message': 'Opération inconnue'})
 
     return response
 
+def format_response(status_code, body):
+    return {
+        'statusCode': status_code,
+        'headers': {
+            'Access-Control-Allow-Origin': '*'
+        },
+        'body': json.dumps(body)
+    }
+
 def create_item(payload):
     table = dynamodb.Table(table_name)
-    response = table.put_item(Item=payload)
-    return {'statusCode': 201, 'body': json.dumps({'message': 'Item créé'})}
+    table.put_item(Item=payload)
+    return format_response(201, {'message': 'Item créé'})
 
 def read_item(payload):
     table = dynamodb.Table(table_name)
     response = table.get_item(Key=payload)
-    return {'statusCode': 200, 'body': json.dumps(response['Item'])}
+    item = response.get('Item')
+    if item:
+        return format_response(200, item)
+    else:
+        return format_response(404, {'message': 'Item non trouvé'})
 
 def update_item(payload):
     table = dynamodb.Table(table_name)
-    response = table.update_item(Key=payload['Key'], UpdateExpression=payload['UpdateExpression'])
-    return {'statusCode': 200, 'body': json.dumps({'message': 'Item mis à jour'})}
+    table.update_item(
+        Key=payload['Key'],
+        UpdateExpression=payload['UpdateExpression'],
+        ExpressionAttributeValues=payload.get('ExpressionAttributeValues', {})
+    )
+    return format_response(200, {'message': 'Item mis à jour'})
 
 def delete_item(payload):
     table = dynamodb.Table(table_name)
-    response = table.delete_item(Key=payload)
-    return {'statusCode': 200, 'body': json.dumps({'message': 'Item supprimé'})}
+    table.delete_item(Key=payload)
+    return format_response(200, {'message': 'Item supprimé'})
