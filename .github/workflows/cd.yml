@@ -51,7 +51,7 @@ jobs:
       - name: Import existing resources
         run: |
           API_ID="${{ secrets.API_GATEWAY_ID }}"
-          RESOURCE_ID="rpyj5i"
+          RESOURCE_ID="${{ secrets.RESOURCE_ID }}"
           STAGE_NAME="dev"
 
           # --- ECR FRONTEND ---
