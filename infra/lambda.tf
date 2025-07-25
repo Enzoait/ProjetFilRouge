@@ -4,24 +4,6 @@ data "archive_file" "lambda_archive" {
   output_path = "${path.module}/lambda/function.zip"
 }
 
-resource "aws_iam_role" "lambda_apigateway_role" {
-  name        = "lambda-apigateway-role"
-  description = "Rôle pour la fonction Lambda"
-
-  assume_role_policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Action = "sts:lambda-apigateway-role"
-        Principal = {
-          Service = "lambda.amazonaws.com"
-        }
-        Effect = "Allow"
-      }
-    ]
-  })
-}
-
 data "aws_iam_role" "lambda_apigateway_role" {
   name = "lambda-apigateway-role"
 }
