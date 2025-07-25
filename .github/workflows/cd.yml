@@ -94,6 +94,11 @@ jobs:
             fi
           fi
 
+          if ! terraform state list | grep -q 'aws_api_gateway_resource.dynamodb_manager'; then
+            terraform import aws_api_gateway_resource.dynamodb_manager ${{ secrets.API_GATEWAY_ID }}/rpyj5i
+          fi
+
+
 
       - name: Import existing OAC
         run: |
