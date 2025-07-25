@@ -75,6 +75,20 @@ jobs:
             terraform import aws_lambda_function.lambda_function_over_https LambdaFunctionOverHttps
           fi
 
+          # Import Lambda permission if not already in state
+          if ! terraform state list | grep -q 'aws_lambda_permission.apigw_lambda'; then
+            terraform import aws_lambda_permission.apigw_lambda LambdaFunctionOverHttps/AllowExecutionFromAPIGateway
+          fi
+
+          # Import API Gateway REST API if needed
+          if ! terraform state list | grep -q 'aws_api_gateway_rest_api.dynamo_db_operations'; then
+            terraform import aws_api_gateway_rest_api.dynamo_db_operations ${{ secrets.API_GATEWAY_ID }}
+          fi
+
+          # Import API Gateway Stage if needed
+          if ! terraform state list | grep -q 'aws_api_gateway_stage.dynamodb_manager'; then
+            terraform import aws_api_gateway_stage.dynamodb_manager ${{ secrets.API_GATEWAY_ID }}/dev
+          fi
 
       - name: Import existing OAC
         run: |
