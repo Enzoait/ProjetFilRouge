@@ -54,92 +54,101 @@ jobs:
           RESOURCE_ID="rpyj5i"
           STAGE_NAME="dev"
 
-          # Import ECR frontend if not already in state
-          if ! terraform state list & grep -q 'aws_ecr_repository.frontend'; then
-            terraform import aws_ecr_repository.frontend projetfilrouge-frontend
+          # --- ECR FRONTEND ---
+          if aws ecr describe-repositories --repository-names projetfilrouge-frontend > /dev/null 2>&1; then
+            if ! terraform state list | grep -q '^aws_ecr_repository.frontend$'; then
+              terraform import aws_ecr_repository.frontend projetfilrouge-frontend
+            fi
           fi
 
-          # Import ECR backend if not already in state
-          if ! terraform state list & grep -q 'aws_ecr_repository.backend'; then
-            terraform import aws_ecr_repository.backend projetfilrouge-backend
+          # --- ECR BACKEND ---
+          if aws ecr describe-repositories --repository-names projetfilrouge-backend > /dev/null 2>&1; then
+            if ! terraform state list | grep -q '^aws_ecr_repository.backend$'; then
+              terraform import aws_ecr_repository.backend projetfilrouge-backend
+            fi
           fi
 
-          # Import S3 bucket if not already in state
-          if ! terraform state list & grep -q 'aws_s3_bucket.main'; then
-            terraform import aws_s3_bucket.main iimtib62673
+          # --- S3 BUCKET ---
+          if aws s3api head-bucket --bucket iimtib62673 2>/dev/null; then
+            if ! terraform state list | grep -q '^aws_s3_bucket.main$'; then
+              terraform import aws_s3_bucket.main iimtib62673
+            fi
           fi
 
-          # Import Lambda function if absent
-          if ! terraform state list & grep -q 'aws_lambda_function.lambda_function_over_https'; then
-            terraform import aws_lambda_function.lambda_function_over_https LambdaFunctionOverHttps
+          # --- LAMBDA FUNCTION ---
+          if aws lambda get-function --function-name LambdaFunctionOverHttps > /dev/null 2>&1; then
+            if ! terraform state list | grep -q '^aws_lambda_function.lambda_function_over_https$'; then
+              terraform import aws_lambda_function.lambda_function_over_https LambdaFunctionOverHttps
+            fi
           fi
 
-          # Import Lambda permission if absent
-          if ! terraform state list & grep -q 'aws_lambda_permission.apigw_lambda'; then
+          # --- LAMBDA PERMISSION ---
+          # On suppose que la Lambda existe déjà (vérifiée juste au-dessus)
+          if ! terraform state list | grep -q '^aws_lambda_permission.apigw_lambda$'; then
             terraform import aws_lambda_permission.apigw_lambda LambdaFunctionOverHttps/AllowExecutionFromAPIGateway
           fi
 
-          # Import API Gateway REST API
-          if ! terraform state list & grep -q 'aws_api_gateway_rest_api.dynamo_db_operations'; then
-            terraform import aws_api_gateway_rest_api.dynamo_db_operations $API_ID
-          fi
-
-          # Import API Gateway Stage
-          if ! terraform state list & grep -q 'aws_api_gateway_stage.dynamodb_manager'; then
-            if aws apigateway get-stage --rest-api-id $API_ID --stage-name $STAGE_NAME > /dev/null 2>&1; then
-              terraform import aws_api_gateway_stage.dynamodb_manager $API_ID/$STAGE_NAME
-            else
-              echo "Stage API Gateway $STAGE_NAME does not exist, skipping import."
+          # --- API GATEWAY REST API ---
+          if aws apigateway get-rest-api --rest-api-id $API_ID > /dev/null 2>&1; then
+            if ! terraform state list | grep -q '^aws_api_gateway_rest_api.dynamo_db_operations$'; then
+              terraform import aws_api_gateway_rest_api.dynamo_db_operations $API_ID
             fi
           fi
 
-          # Import API Gateway Resource
-          if ! terraform state list & grep -q '^aws_api_gateway_resource.dynamodb_manager$'; then
-            terraform import aws_api_gateway_resource.dynamodb_manager ${API_ID}/${RESOURCE_ID}
+          # --- API GATEWAY STAGE ---
+          if aws apigateway get-stage --rest-api-id $API_ID --stage-name $STAGE_NAME > /dev/null 2>&1; then
+            if ! terraform state list | grep -q '^aws_api_gateway_stage.dynamodb_manager$'; then
+              terraform import aws_api_gateway_stage.dynamodb_manager $API_ID/$STAGE_NAME
+            fi
+          else
+            echo "Stage API Gateway $STAGE_NAME does not exist, skipping import."
           fi
 
-          # Methods list including OPTIONS
+          # --- API GATEWAY RESOURCE ---
+          if aws apigateway get-resource --rest-api-id $API_ID --resource-id $RESOURCE_ID > /dev/null 2>&1; then
+            if ! terraform state list | grep -q '^aws_api_gateway_resource.dynamodb_manager$'; then
+              terraform import aws_api_gateway_resource.dynamodb_manager ${API_ID}/${RESOURCE_ID}
+            fi
+          fi
+
+          # --- METHODS + RESPONSES ---
           methods=("POST" "GET" "PUT" "DELETE" "OPTIONS")
 
           for method in "${methods[@]}"; do
-            lname="${method,,}_method"  # ex: post_method, option_method
+            lname="${method,,}_method"
 
-            # Import aws_api_gateway_method
-            if ! terraform state list & grep -q "^aws_api_gateway_method.${lname}$"; then
-              terraform import aws_api_gateway_method.${lname} ${API_ID}/${RESOURCE_ID}/${method}
-            fi
+            if aws apigateway get-method \
+              --rest-api-id $API_ID \
+              --resource-id $RESOURCE_ID \
+              --http-method $method > /dev/null 2>&1; then
 
-            # Import aws_api_gateway_integration (no _integration suffix, just _method)
-            if ! terraform state list & grep -q "^aws_api_gateway_integration.${lname}$"; then
-              terraform import aws_api_gateway_integration.${lname} ${API_ID}/${RESOURCE_ID}/${method}
-            fi
-
-            # Import aws_api_gateway_method_response
-            method_response_name="${lname}_response_200"  # ex: post_method_response_200 or get_response_200
-            if [ "$method" = "OPTIONS" ]; then
-              # OPTIONS method_response resource name is "options"
-              if ! terraform state list & grep -q "^aws_api_gateway_method_response.options$"; then
-                terraform import aws_api_gateway_method_response.options ${API_ID}/${RESOURCE_ID}/${method}/200
+              if ! terraform state list | grep -q "^aws_api_gateway_method.${lname}$"; then
+                terraform import aws_api_gateway_method.${lname} ${API_ID}/${RESOURCE_ID}/${method}
               fi
-            else
-              if ! terraform state list & grep -q "^aws_api_gateway_method_response.${method_response_name}$"; then
-                terraform import aws_api_gateway_method_response.${method_response_name} ${API_ID}/${RESOURCE_ID}/${method}/200
-              fi
-            fi
 
-            # Import aws_api_gateway_integration_response
-            integration_response_name="${lname}"  
-            # mais suffixé, ex: post_method, get_method etc.
-            if [ "$method" = "OPTIONS" ]; then
-              if ! terraform state list & grep -q "^aws_api_gateway_integration_response.options$"; then
-                terraform import aws_api_gateway_integration_response.options ${API_ID}/${RESOURCE_ID}/${method}/200
+              if ! terraform state list | grep -q "^aws_api_gateway_integration.${lname}$"; then
+                terraform import aws_api_gateway_integration.${lname} ${API_ID}/${RESOURCE_ID}/${method}
               fi
-            else
-              if ! terraform state list & grep -q "^aws_api_gateway_integration_response.${integration_response_name}$"; then
-                terraform import aws_api_gateway_integration_response.${integration_response_name} ${API_ID}/${RESOURCE_ID}/${method}/200
+
+              method_response_name="${lname}_response_200"
+              if [ "$method" = "OPTIONS" ]; then
+                if ! terraform state list | grep -q "^aws_api_gateway_method_response.options$"; then
+                  terraform import aws_api_gateway_method_response.options ${API_ID}/${RESOURCE_ID}/${method}/200
+                fi
+                if ! terraform state list | grep -q "^aws_api_gateway_integration_response.options$"; then
+                  terraform import aws_api_gateway_integration_response.options ${API_ID}/${RESOURCE_ID}/${method}/200
+                fi
+              else
+                if ! terraform state list | grep -q "^aws_api_gateway_method_response.${method_response_name}$"; then
+                  terraform import aws_api_gateway_method_response.${method_response_name} ${API_ID}/${RESOURCE_ID}/${method}/200
+                fi
+                if ! terraform state list | grep -q "^aws_api_gateway_integration_response.${lname}$"; then
+                  terraform import aws_api_gateway_integration_response.${lname} ${API_ID}/${RESOURCE_ID}/${method}/200
+                fi
               fi
             fi
           done
+
 
       - name: Import existing OAC
         run: |
