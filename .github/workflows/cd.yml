@@ -98,7 +98,51 @@ jobs:
             terraform import aws_api_gateway_resource.dynamodb_manager ${{ secrets.API_GATEWAY_ID }}/rpyj5i
           fi
 
+          API_ID="${{ secrets.API_GATEWAY_ID }}"          
+          RESOURCE_ID="rpyj5i"        
+          STAGE_NAME="dev"          
 
+          # Import aws_api_gateway_resource
+          if ! terraform state list | grep -q '^aws_api_gateway_resource.dynamodb_manager$'; then
+            terraform import aws_api_gateway_resource.dynamodb_manager ${API_ID}/${RESOURCE_ID}
+          fi
+
+          # Import aws_api_gateway_method pour toutes les méthodes HTTP courantes
+          for method in POST GET PUT DELETE OPTIONS PATCH; do
+            resource_name="${method,,}_method"  # ex: post_method
+            if ! terraform state list | grep -q "^aws_api_gateway_method.${resource_name}$"; then
+              terraform import aws_api_gateway_method.${resource_name} ${API_ID}/${RESOURCE_ID}/${method}
+            fi
+          done
+
+          # Import aws_api_gateway_integration pour chaque méthode (si tu en as défini)
+          for method in POST GET PUT DELETE OPTIONS PATCH; do
+            integration_name="${method,,}_integration"  # ex: post_integration
+            if ! terraform state list | grep -q "^aws_api_gateway_integration.${integration_name}$"; then
+              terraform import aws_api_gateway_integration.${integration_name} ${API_ID}/${RESOURCE_ID}/${method}
+            fi
+          done
+
+          # Import aws_api_gateway_method_response (réponses pour chaque méthode)
+          for method in POST GET PUT DELETE OPTIONS PATCH; do
+            method_response_name="${method,,}_method_response"  # ex: post_method_response
+            if ! terraform state list | grep -q "^aws_api_gateway_method_response.${method_response_name}$"; then
+              terraform import aws_api_gateway_method_response.${method_response_name} ${API_ID}/${RESOURCE_ID}/${method}/200
+            fi
+          done
+
+          # Import aws_api_gateway_integration_response (réponses d'intégration)
+          for method in POST GET PUT DELETE OPTIONS PATCH; do
+            integration_response_name="${method,,}_integration_response"  # ex: post_integration_response
+            if ! terraform state list | grep -q "^aws_api_gateway_integration_response.${integration_response_name}$"; then
+              terraform import aws_api_gateway_integration_response.${integration_response_name} ${API_ID}/${RESOURCE_ID}/${method}/200
+            fi
+          done
+
+          # Import aws_api_gateway_stage
+          if ! terraform state list | grep -q '^aws_api_gateway_stage.api_stage$'; then
+            terraform import aws_api_gateway_stage.api_stage ${API_ID}/${STAGE_NAME}
+          fi
 
       - name: Import existing OAC
         run: |
