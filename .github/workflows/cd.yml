@@ -134,8 +134,16 @@ jobs:
               fi
 
               # API Gateway Integration
-              if ! terraform state list | grep -q "^aws_api_gateway_integration.${lname}$"; then
-                terraform import aws_api_gateway_integration.${lname} ${API_ID}/${RESOURCE_ID}/${method}
+              if aws apigateway get-integration \
+                --rest-api-id "$API_ID" \
+                --resource-id "$RESOURCE_ID" \
+                --http-method "$method" > /dev/null 2>&1; then
+
+                if ! terraform state list | grep -q "^aws_api_gateway_integration.${lname}$"; then
+                  terraform import aws_api_gateway_integration.${lname} ${API_ID}/${RESOURCE_ID}/${method}
+                fi
+              else
+                echo "No integration found for $method — skipping import aws_api_gateway_integration.${lname}"
               fi
 
               # Method response name (ex: post_method_response_200)
