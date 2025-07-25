@@ -108,7 +108,7 @@ resource "aws_api_gateway_integration_response" "post_method" {
   rest_api_id = aws_api_gateway_rest_api.dynamo_db_operations.id
   resource_id = aws_api_gateway_resource.dynamodb_manager.id
   http_method = aws_api_gateway_method.post_method.http_method
-  status_code = aws_api_gateway_method_response.post_response_200.status_code
+  status_code = aws_api_gateway_method_response.post_method_response_200.status_code
 
 
   depends_on = [
