@@ -69,10 +69,8 @@ jobs:
           if ! terraform state list | grep -q 'aws_s3_bucket.main'; then
             terraform import aws_s3_bucket.main iimtib62673
           fi
-          # Import CloudFront distribution if not already in state
-          if ! terraform state list | grep -q 'aws_cloudfront_distribution.main'; then
-            terraform import aws_cloudfront_distribution.main arn:aws:cloudfront::304230205768:distribution/304230205768
-          fi
+
+          terraform import aws_lambda_function.lambda_function_over_https arn:aws:lambda:eu-west-1:304230205768:function:LambdaFunctionOverHttps
 
       - name: Import existing OAC
         run: |
