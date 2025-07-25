@@ -69,7 +69,11 @@ jobs:
           if ! terraform state list | grep -q 'aws_s3_bucket.main'; then
             terraform import aws_s3_bucket.main iimtib62673
           fi
-      
+          # Import CloudFront distribution if not already in state
+          if ! terraform state list | grep -q 'aws_cloudfront_distribution.main'; then
+            terraform import aws_cloudfront_distribution.main arn:aws:cloudfront::304230205768:distribution/304230205768
+          fi
+
       - name: Import existing OAC
         run: |
           terraform import aws_cloudfront_origin_access_control.s3_oac ${{ secrets.AWS_OAC_ID }}

@@ -226,11 +226,11 @@ resource "aws_api_gateway_method" "option_method" {
 
 
 resource "aws_api_gateway_integration" "options_method" {
-  http_method = aws_api_gateway_method.post_method.http_method
-  resource_id = aws_api_gateway_resource.dynamodb_manager.id
-  rest_api_id = aws_api_gateway_rest_api.dynamo_db_operations.id
-   integration_http_method = "POST"
-   type                    = "MOCK"
+  http_method             = aws_api_gateway_method.option_method.http_method  
+  resource_id             = aws_api_gateway_resource.dynamodb_manager.id
+  rest_api_id             = aws_api_gateway_rest_api.dynamo_db_operations.id
+  integration_http_method = "OPTIONS" # ou "POST" pour MOCK, mais OPTIONS est plus logique ici
+  type                    = "MOCK"
 }
 resource "aws_api_gateway_method_response" "options" {
   rest_api_id = aws_api_gateway_rest_api.dynamo_db_operations.id
