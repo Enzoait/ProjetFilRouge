@@ -87,8 +87,13 @@ jobs:
 
           # Import API Gateway Stage if needed
           if ! terraform state list | grep -q 'aws_api_gateway_stage.dynamodb_manager'; then
-            terraform import aws_api_gateway_stage.dynamodb_manager ${{ secrets.API_GATEWAY_ID }}/dev
+            if aws apigateway get-stage --rest-api-id ${{ secrets.API_GATEWAY_ID }} --stage-name dev > /dev/null 2>&1; then
+              terraform import aws_api_gateway_stage.dynamodb_manager ${{ secrets.API_GATEWAY_ID }}/dev
+            else
+              echo "Stage API Gateway dev does not exist, skipping import."
+            fi
           fi
+
 
       - name: Import existing OAC
         run: |
