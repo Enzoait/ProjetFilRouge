@@ -217,7 +217,7 @@ resource "aws_api_gateway_integration_response" "delete_method" {
 
 # OPTIONS FOR CORS
 
-resource "aws_api_gateway_method" "option_method" {
+resource "aws_api_gateway_method" "options_method" {
   authorization = "NONE"
   http_method   = "OPTIONS"
   resource_id   = aws_api_gateway_resource.dynamodb_manager.id
