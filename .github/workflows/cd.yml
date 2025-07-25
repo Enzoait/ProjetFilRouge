@@ -116,7 +116,6 @@ jobs:
 
             # Import aws_api_gateway_method_response
             method_response_name="${lname}_response_200"  # ex: post_method_response_200 or get_response_200
-            # Note : dans ta config OPTIONS a simplement "options", pas "option_method_response"
             if [ "$method" = "OPTIONS" ]; then
               # OPTIONS method_response resource name is "options"
               if ! terraform state list | grep -q "^aws_api_gateway_method_response.options$"; then
@@ -129,7 +128,7 @@ jobs:
             fi
 
             # Import aws_api_gateway_integration_response
-            integration_response_name="${lname}"  # dans ta config integration_response a même nom que integration
+            integration_response_name="${lname}"  
             # mais suffixé, ex: post_method, get_method etc.
             if [ "$method" = "OPTIONS" ]; then
               if ! terraform state list | grep -q "^aws_api_gateway_integration_response.options$"; then
