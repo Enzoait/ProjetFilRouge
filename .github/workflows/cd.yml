@@ -86,11 +86,11 @@ jobs:
             fi
           fi
 
-          # --- LAMBDA PERMISSION ---
-          # On suppose que la Lambda existe déjà (vérifiée juste au-dessus)
-          if ! terraform state list | grep -q '^aws_lambda_permission.apigw_lambda$'; then
-            terraform import aws_lambda_permission.apigw_lambda LambdaFunctionOverHttps/AllowExecutionFromAPIGateway
-          fi
+          # # --- LAMBDA PERMISSION ---
+          # # On suppose que la Lambda existe déjà (vérifiée juste au-dessus)
+          # if ! terraform state list | grep -q '^aws_lambda_permission.apigw_lambda$'; then
+          #   terraform import aws_lambda_permission.apigw_lambda LambdaFunctionOverHttps/AllowExecutionFromAPIGateway
+          # fi
 
           # --- API GATEWAY REST API ---
           if aws apigateway get-rest-api --rest-api-id $API_ID > /dev/null 2>&1; then
@@ -99,14 +99,14 @@ jobs:
             fi
           fi
 
-          # --- API GATEWAY STAGE ---
-          if aws apigateway get-stage --rest-api-id $API_ID --stage-name $STAGE_NAME > /dev/null 2>&1; then
-            if ! terraform state list | grep -q '^aws_api_gateway_stage.dynamodb_manager$'; then
-              terraform import aws_api_gateway_stage.dynamodb_manager $API_ID/$STAGE_NAME
-            fi
-          else
-            echo "Stage API Gateway $STAGE_NAME does not exist, skipping import."
-          fi
+          # # --- API GATEWAY STAGE ---
+          # if aws apigateway get-stage --rest-api-id $API_ID --stage-name $STAGE_NAME > /dev/null 2>&1; then
+          #   if ! terraform state list | grep -q '^aws_api_gateway_stage.dynamodb_manager$'; then
+          #     terraform import aws_api_gateway_stage.dynamodb_manager $API_ID/$STAGE_NAME
+          #   fi
+          # else
+          #   echo "Stage API Gateway $STAGE_NAME does not exist, skipping import."
+          # fi
 
           # --- API GATEWAY RESOURCE ---
           if aws apigateway get-resource --rest-api-id $API_ID --resource-id $RESOURCE_ID > /dev/null 2>&1; then
