@@ -5,9 +5,15 @@ dynamodb = boto3.resource('dynamodb')
 table_name = 'lambda-apigateway'
 
 def lambda_handler(event, context):
+
+    try:
+        body = json.loads(event.get('body', '{}'))
+    except json.JSONDecodeError:
+        return format_response(400, {'message': 'Corps de requête JSON invalide'})
+
     # Récupération des paramètres de la requête
-    operation = event.get('operation')
-    payload = event.get('payload')
+    operation = body.get('operation')
+    payload = body.get('payload')
 
     # Traitement de la requête
     if operation == 'create':
