@@ -3,7 +3,7 @@ import { v4 as uuidv4 } from "uuid";
 import "./App.css";
 
 const API_URL =
-  "https://zitlhcy34g.execute-api.eu-west-1.amazonaws.com/dev/DynamoDBManager";
+  "https://iewk0uuqre.execute-api.eu-west-1.amazonaws.com/dev/todos";
 
 function App() {
   const [todos, setTodos] = useState([]);
