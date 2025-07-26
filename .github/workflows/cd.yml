@@ -44,7 +44,7 @@ jobs:
 
       - name: Tag & Push Backend Lambda function
         run: |
-          aws lambda update-function-code --function-name LambdaFunctionOverHttps --zip-file fileb://lambda_function.zip
+          aws lambda update-function-code --function-name LambdaFunctionOverHttps --zip-file fileb://infra/lambda/lambda_function.zip
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
