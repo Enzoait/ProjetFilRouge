@@ -12,7 +12,7 @@ resource "aws_lambda_function" "lambda_function_over_https" {
   filename         = data.archive_file.lambda_archive.output_path
   function_name    = "LambdaFunctionOverHttps"
   role             = data.aws_iam_role.lambda_apigateway_role.arn
-  handler          = "index.handler"
+  handler          = "lambda_function.handler"
   runtime          = "nodejs14.x"
   source_code_hash = data.archive_file.lambda_archive.output_base64sha256
   tags             = var.tags
