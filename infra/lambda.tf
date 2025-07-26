@@ -34,6 +34,37 @@ resource "aws_api_gateway_resource" "dynamodb_manager" {
   rest_api_id = aws_api_gateway_rest_api.dynamo_db_operations.id
 }
 
+# Donne les droits CloudWatch Logs au rôle Lambda
+data "aws_iam_policy_document" "lambda_cloudwatch_logs" {
+  statement {
+    actions = [
+      "logs:CreateLogGroup",
+      "logs:CreateLogStream",
+      "logs:PutLogEvents"
+    ]
+    resources = ["arn:aws:logs:*:*:*"]
+    effect    = "Allow"
+  }
+}
+
+resource "aws_iam_policy" "lambda_cloudwatch_logs" {
+  name   = "lambda-cloudwatch-logs"
+  policy = data.aws_iam_policy_document.lambda_cloudwatch_logs.json
+}
+
+resource "aws_iam_role_policy_attachment" "lambda_logs" {
+  role       = data.aws_iam_role.lambda_apigateway_role.name
+  policy_arn = aws_iam_policy.lambda_cloudwatch_logs.arn
+}
+
+# (Optionnel mais recommandé)
+resource "aws_cloudwatch_log_group" "lambda" {
+  name              = "/aws/lambda/${aws_lambda_function.lambda_function_over_https.function_name}"
+  retention_in_days = 14
+  tags              = var.tags
+}
+
+
 resource "aws_api_gateway_method" "post_method" {
   authorization = "NONE"
   http_method   = "POST"
