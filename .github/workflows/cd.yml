@@ -175,12 +175,6 @@ jobs:
             fi
           fi
 
-          # # --- LAMBDA PERMISSION ---
-          # # On suppose que la Lambda existe déjà (vérifiée juste au-dessus)
-          # if ! terraform state list | grep -q '^aws_lambda_permission.apigw_lambda$'; then
-          #   terraform import aws_lambda_permission.apigw_lambda LambdaFunctionOverHttps/AllowExecutionFromAPIGateway
-          # fi
-
           # --- API GATEWAY REST API ---
           if aws apigateway get-rest-api --rest-api-id $API_ID > /dev/null 2>&1; then
             if ! terraform state list | grep -q '^aws_api_gateway_rest_api.dynamo_db_operations$'; then
