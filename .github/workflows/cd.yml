@@ -55,8 +55,9 @@ jobs:
       - name: Import existing resources
         run: |
           API_ID="${{ secrets.API_GATEWAY_ID }}"
-          RESSOURCE_ID="${{ secrets.RESOURCE_ID }}"
-          # Créer une map ressource => resource_id
+          RESOURCE_ID="${{ secrets.RESOURCE_ID }}"
+
+          # Récupération des resource IDs pour /todos et /todos/{id}
           TODOS_RESOURCE_ID=$(aws apigateway get-resources --rest-api-id "$API_ID" | jq -r '.items[] | select(.path=="/todos") | .id')
           TODOS_ID_RESOURCE_ID=$(aws apigateway get-resources --rest-api-id "$API_ID" | jq -r '.items[] | select(.path=="/todos/{id}") | .id')
 
@@ -71,11 +72,11 @@ jobs:
           for method in POST GET PUT DELETE OPTIONS; do
             lower_method=$(echo "$method" | tr '[:upper:]' '[:lower:]')
             resource_key=${methods_resources[$lower_method]}
+
             if [ "$resource_key" = "todos" ]; then
               resource_id=$TODOS_RESOURCE_ID
               lname="${lower_method}_todos"
               method_response_suffix="_response_200"
-              # OPTIONS method_response and integration_response named "options_todos"
               if [ "$method" = "OPTIONS" ]; then
                 lname="options_todos"
               fi
@@ -91,15 +92,15 @@ jobs:
               continue
             fi
 
-            # Check if method exists in API Gateway
+            # Vérifie si la méthode existe dans API Gateway pour cette resource
             if aws apigateway get-method --rest-api-id "$API_ID" --resource-id "$resource_id" --http-method "$method" > /dev/null 2>&1; then
 
-              # Import api_gateway_method
+              # Import de la ressource aws_api_gateway_method
               if ! terraform state list | grep -q "^aws_api_gateway_method.${lname}$"; then
                 terraform import aws_api_gateway_method.${lname} ${API_ID}/${resource_id}/${method}
               fi
 
-              # Import api_gateway_integration if exists
+              # Import de l'intégration si elle existe
               if aws apigateway get-integration --rest-api-id "$API_ID" --resource-id "$resource_id" --http-method "$method" > /dev/null 2>&1; then
                 if ! terraform state list | grep -q "^aws_api_gateway_integration.${lname}$"; then
                   terraform import aws_api_gateway_integration.${lname} ${API_ID}/${resource_id}/${method}
@@ -108,31 +109,30 @@ jobs:
                 echo "No integration found for $method $resource_key — skipping import aws_api_gateway_integration.${lname}"
               fi
 
-
-              # Import api_gateway_method_response or options case special name
+              # Import des method response et integration response
               if [ "$method" = "OPTIONS" ]; then
+                # OPTIONS a un nom particulier
                 if aws apigateway get-method-response --rest-api-id "$API_ID" --resource-id "$resource_id" --http-method OPTIONS --status-code 200 > /dev/null 2>&1; then
                   if ! terraform state list | grep -q "^aws_api_gateway_method_response.${lname}$"; then
                     terraform import aws_api_gateway_method_response.${lname} ${API_ID}/${resource_id}/OPTIONS/200
                   fi
                 fi
 
-                # Integration response options
                 if aws apigateway get-integration-response --rest-api-id "$API_ID" --resource-id "$resource_id" --http-method OPTIONS --status-code 200 > /dev/null 2>&1; then
                   if ! terraform state list | grep -q "^aws_api_gateway_integration_response.${lname}$"; then
                     terraform import aws_api_gateway_integration_response.${lname} ${API_ID}/${resource_id}/OPTIONS/200
                   fi
                 fi
               else
-                # Other methods method_response (ex: get_todos_response_200)
-                mr_name="${lname}${method_response_suffix}"
+                # Méthodes GET, POST, PUT, DELETE
+                mr_name="${lname}"
+
                 if aws apigateway get-method-response --rest-api-id "$API_ID" --resource-id "$resource_id" --http-method "$method" --status-code 200 > /dev/null 2>&1; then
                   if ! terraform state list | grep -q "^aws_api_gateway_method_response.${mr_name}$"; then
                     terraform import aws_api_gateway_method_response.${mr_name} ${API_ID}/${resource_id}/${method}/200
                   fi
                 fi
 
-                # Other methods integration_response
                 if aws apigateway get-integration-response --rest-api-id "$API_ID" --resource-id "$resource_id" --http-method "$method" --status-code 200 > /dev/null 2>&1; then
                   if ! terraform state list | grep -q "^aws_api_gateway_integration_response.${lname}$"; then
                     terraform import aws_api_gateway_integration_response.${lname} ${API_ID}/${resource_id}/${method}/200
@@ -145,6 +145,7 @@ jobs:
             fi
 
           done
+
 
           # --- ECR FRONTEND ---
           if aws ecr describe-repositories --repository-names projetfilrouge-frontend > /dev/null 2>&1; then
