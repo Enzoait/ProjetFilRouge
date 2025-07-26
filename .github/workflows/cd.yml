@@ -190,8 +190,15 @@ jobs:
 
           # --- API GATEWAY RESOURCE ---
           if aws apigateway get-resource --rest-api-id $API_ID --resource-id $RESOURCE_ID > /dev/null 2>&1; then
-            if ! terraform state list | grep -q '^aws_api_gateway_resource.dynamodb_manager$'; then
-              terraform import aws_api_gateway_resource.dynamodb_manager ${API_ID}/${RESOURCE_ID}
+            if ! terraform state list | grep -q '^aws_api_gateway_resource.todos$'; then
+              terraform import aws_api_gateway_resource.todos ${API_ID}/${RESOURCE_ID}
+            fi
+          fi
+
+          # --- API GATEWAY RESOURCE ---
+          if aws apigateway get-resource --rest-api-id $API_ID --resource-id $RESOURCE_ID > /dev/null 2>&1; then
+            if ! terraform state list | grep -q '^aws_api_gateway_resource.todos_id$'; then
+              terraform import aws_api_gateway_resource.todos_id ${API_ID}/${RESOURCE_ID}
             fi
           fi
 
