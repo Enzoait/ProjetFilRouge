@@ -251,7 +251,7 @@ resource "aws_api_gateway_integration" "options_method" {
   }
 }
 
-resource "aws_api_gateway_integration_response" "options_method" {
+resource "aws_api_gateway_integration_response" "options" {
   rest_api_id = aws_api_gateway_rest_api.dynamo_db_operations.id
   resource_id = aws_api_gateway_resource.dynamodb_manager.id
   http_method = aws_api_gateway_method.options_method.http_method
