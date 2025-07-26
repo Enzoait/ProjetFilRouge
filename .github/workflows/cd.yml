@@ -115,6 +115,23 @@ jobs:
             fi
           fi
 
+          # Vérifier si la policy existe puis importer si pas déjà dans le state terraform
+          POLICY_ARN="arn:aws:iam::${{ secrets.AWS_ACC_ID }}:policy/lambda-cloudwatch-logs"
+
+          if aws iam get-policy --policy-arn "$POLICY_ARN" > /dev/null 2>&1; then
+            if ! terraform state list | grep -q '^aws_iam_policy.lambda_cloudwatch_logs$'; then
+              terraform import aws_iam_policy.lambda_cloudwatch_logs $POLICY_ARN
+            fi
+          fi
+
+          LOG_GROUP_NAME="/aws/lambda/LambdaFunctionOverHttps"
+          if aws logs describe-log-groups --log-group-name-prefix "$LOG_GROUP_NAME" | grep -q "$LOG_GROUP_NAME"; then
+            if ! terraform state list | grep -q '^aws_cloudwatch_log_group.lambda$'; then
+              terraform import aws_cloudwatch_log_group.lambda "$LOG_GROUP_NAME"
+            fi
+          fi
+
+
           # --- METHODS + RESPONSES ---
           methods=("POST" "GET" "PUT" "DELETE" "OPTIONS")
 
