@@ -197,7 +197,7 @@ resource "aws_api_gateway_method" "options_method" {
   rest_api_id   = aws_api_gateway_rest_api.dynamo_db_operations.id
 }
 
-resource "aws_api_gateway_method_response" "options_method_response_200" {
+resource "aws_api_gateway_method_response" "options" {
   rest_api_id = aws_api_gateway_rest_api.dynamo_db_operations.id
   resource_id = aws_api_gateway_resource.dynamodb_manager.id
   http_method = aws_api_gateway_method.options_method.http_method
