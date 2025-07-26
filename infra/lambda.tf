@@ -224,7 +224,7 @@ resource "aws_api_gateway_integration_response" "options_method" {
   rest_api_id = aws_api_gateway_rest_api.dynamo_db_operations.id
   resource_id = aws_api_gateway_resource.dynamodb_manager.id
   http_method = aws_api_gateway_method.options_method.http_method
-  status_code = aws_api_gateway_method_response.options_method_response_200.status_code
+  status_code = aws_api_gateway_method_response.options.status_code
   response_parameters = {
     "method.response.header.Access-Control-Allow-Origin" = "'*'"
     "method.response.header.Access-Control-Allow-Headers" = "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
