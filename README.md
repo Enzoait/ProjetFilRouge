@@ -104,6 +104,10 @@ Légende :
 11) Envoie de la réponse à la requête vers l'application React
 12) Affichage des données mises à jour pour l'utilisateur
 
+## Information Importante
+
+Ce projet contient l'architechture souhaitée ainsi que les microservices AWS vus en cours. Cepandant pour la partie API, à cause de problèmes avec API Gateway, j'ai finalement déployé un autre backend (code dispo dans le dossier `back2`) afin de pouvoir faire fonctionner la récupèration, création, mise a jour et supression des todos. L'architechture, le README, ainsi que le schéma s'articulent autour d'API Gateway pour indiqué le fonctionnement attendu dans le cas ou je n'avais pas rencontré de problèmes avec API Gateway. 
+
 
 ## Conclusion 📗
 ----------

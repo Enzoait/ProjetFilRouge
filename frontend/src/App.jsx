@@ -2,8 +2,7 @@ import { useEffect, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 import "./App.css";
 
-const API_URL =
-  "https://iewk0uuqre.execute-api.eu-west-1.amazonaws.com/dev/todos";
+const API_URL = "https://back-todo-devops.vercel.app/api/todos";
 
 function App() {
   const [todos, setTodos] = useState([]);
