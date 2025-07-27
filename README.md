@@ -69,7 +69,7 @@ L'API Gateway est responsable de la gestion des requêtes et des réponses entre
 * POST : pour créer des données
 * PUT : pour modifier des données
 * DELETE : pour supprimer des données
-* OPTIONS : pour le CORS
+* OPTIONS : pour les entêtes CORS
 
 ## Déploiement 🦅
 -------------
