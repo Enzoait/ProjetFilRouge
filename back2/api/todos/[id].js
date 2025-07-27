@@ -1,6 +1,6 @@
-const supabase = require("../../supabaseClient");
+import supabase from "../../supabaseClient.js";
 
-module.exports = async (req, res) => {
+export default async function handler(req, res) {
   const {
     query: { id },
     method,
@@ -24,4 +24,4 @@ module.exports = async (req, res) => {
   }
 
   res.status(405).send("Method Not Allowed");
-};
+}

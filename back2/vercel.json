@@ -1,4 +1,8 @@
 {
   "version": 2,
-  "builds": [{ "src": "api/**/*.js", "use": "@vercel/node" }]
+  "builds": [{ "src": "api/**/*.js", "use": "@vercel/node" }],
+  "routes": [
+    { "src": "/api/todos/([^/]+)", "dest": "/api/todos/[id].js?id=$1" },
+    { "src": "/api/todos", "dest": "/api/todos/index.js" }
+  ]
 }
